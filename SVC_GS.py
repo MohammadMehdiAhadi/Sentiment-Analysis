@@ -25,8 +25,8 @@ vectorizer = TfidfVectorizer(max_features=5000)
 x_train_tfidf = vectorizer.fit_transform(x_train)
 x_test_tfidf = vectorizer.transform(x_test)
 
-params = {"C": [3.0, 2.0],
-          "kernel": ['poly', 'rbf', 'sigmoid', 'precomputed']
+params = {"C": [    3.0, 2.0,1.0,0.5],
+          "kernel": ['poly', 'rbf']
           }
 model = GridSearchCV(estimator=SVC(tol=1e-5, gamma='scale'),
                      param_grid=params,
@@ -37,3 +37,5 @@ model.predict(x_test_tfidf)
 print(model.best_params_)
 print(model.best_score_)
 
+# {'C': 2.0, 'kernel': 'rbf'}
+# 0.7674829492312705

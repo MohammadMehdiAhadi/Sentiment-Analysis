@@ -40,3 +40,5 @@ model.fit(x_train_tfidf, y_train)
 model.predict(x_test_tfidf)
 print(model.best_params_)
 print(model.best_score_)
+# {'criterion': 'gini', 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 300}
+# 0.7434066857929528

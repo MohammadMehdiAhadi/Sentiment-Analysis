@@ -26,9 +26,9 @@ x_train_tfidf = vectorizer.fit_transform(x_train)
 x_test_tfidf = vectorizer.transform(x_test)
 
 params = {"hidden_layer_sizes": [(500,), (512, 256, 128, 64, 32)],
-          "activation": ['tanh', 'relu']
-          # "solver": ['lbfgs', 'sgd', 'adam'],
-          # "max_iter": [1000,1500]
+          "activation": ['tanh', 'relu'],
+           "solver": ['lbfgs', 'sgd', 'adam'],
+           "max_iter": [1000,1500]
           }
 model = GridSearchCV(estimator=MLPClassifier(early_stopping=False),
                      param_grid=params,
@@ -37,3 +37,4 @@ model.fit(x_train_tfidf, y_train)
 model.predict(x_test_tfidf)
 print(model.best_params_)
 print(model.best_score_)
+#{'activation': 'relu',0.7249416763329728
