@@ -1,11 +1,11 @@
 import chardet
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.neighbors import KNeighborsClassifier as Knn
 
-with open("all_data.csv", "rb") as file:
+from sklearn.model_selection import train_test_split, GridSearchCV
+
+with open("../all_data.csv", "rb") as file:
     raw_data = file.read()
     result = chardet.detect(raw_data)
     encoding = result['encoding']
@@ -13,7 +13,7 @@ with open("all_data.csv", "rb") as file:
 
 # Load CSV using detected encoding
 column_names = ['Sentiment', 'Text']
-df = pd.read_csv("all_data.csv", names=column_names, encoding=encoding)
+df = pd.read_csv("../all_data.csv", names=column_names, encoding=encoding)
 
 # Split data into features (X) and labels (y)
 X = df["Text"]
@@ -26,17 +26,19 @@ vectorizer = TfidfVectorizer(max_features=5000)
 x_train_tfidf = vectorizer.fit_transform(x_train)
 x_test_tfidf = vectorizer.transform(x_test)
 
-params = {"penalty": ['l1', 'l2'],
-          "dual": [True, False],
-          "C": [5,7,9],
-          "solver" : ['lbfgs', 'liblinear', 'saga'],
-          "max_iter" : [250,500,300,700]
+
+
+params = {"n_estimators": [100, 200, 300, 500],
+          "criterion": ["gini", "entropy", "log_loss"],
+          "min_samples_split": [2, 3, 4, 5],
+          "min_samples_leaf": [1, 2, 3, 4, 5]
           }
-model = GridSearchCV(estimator=LogisticRegression(max_iter=1000),
+model = GridSearchCV(estimator=RandomForestClassifier(),
                      param_grid=params,
                      scoring="accuracy")
 model.fit(x_train_tfidf, y_train)
 model.predict(x_test_tfidf)
 print(model.best_params_)
 print(model.best_score_)
-# {'C': 7, 'penalty': 'l1', 'solver': 'liblinear'}0.7791770442531816
+# {'criterion': 'gini', 'min_samples_leaf': 1, 'min_samples_split': 2, 'n_estimators': 300}
+# 0.7434066857929528

@@ -2,9 +2,9 @@ import chardet
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
 
-with open("all_data.csv", "rb") as file:
+with open("../all_data.csv", "rb") as file:
     raw_data = file.read()
     result = chardet.detect(raw_data)
     encoding = result['encoding']
@@ -12,7 +12,7 @@ with open("all_data.csv", "rb") as file:
 
 # Load CSV using detected encoding
 column_names = ['Sentiment', 'Text']
-df = pd.read_csv("all_data.csv", names=column_names, encoding=encoding)
+df = pd.read_csv("../all_data.csv", names=column_names, encoding=encoding)
 
 # Split data into features (X) and labels (y)
 X = df["Text"]
@@ -25,16 +25,17 @@ vectorizer = TfidfVectorizer(max_features=5000)
 x_train_tfidf = vectorizer.fit_transform(x_train)
 x_test_tfidf = vectorizer.transform(x_test)
 
-params = {"hidden_layer_sizes": [(500,), (512, 256, 128, 64, 32)],
-          "activation": ['tanh', 'relu'],
-           "solver": ['lbfgs', 'sgd', 'adam'],
-           "max_iter": [1000,1500]
+params = {"C": [3.0, 2.0, 1.0, 0.5],
+          "kernel": ['poly', 'rbf']
           }
-model = GridSearchCV(estimator=MLPClassifier(early_stopping=False),
+model = GridSearchCV(estimator=SVC(tol=1e-5, gamma='scale'),
                      param_grid=params,
-                     scoring="accuracy")
+                     scoring="accuracy",
+                     )
 model.fit(x_train_tfidf, y_train)
 model.predict(x_test_tfidf)
 print(model.best_params_)
 print(model.best_score_)
-#{'activation': 'relu',0.7249416763329728
+
+# {'C': 2.0, 'kernel': 'rbf'}
+# 0.7674829492312705

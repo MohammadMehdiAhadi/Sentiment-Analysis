@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
 
-with open("all_data.csv", "rb") as file:
+with open("../all_data.csv", "rb") as file:
     raw_data = file.read()
     result = chardet.detect(raw_data)
     encoding = result['encoding']
@@ -12,7 +12,7 @@ with open("all_data.csv", "rb") as file:
 
 # Load CSV using detected encoding
 column_names = ['Sentiment', 'Text']
-df = pd.read_csv("all_data.csv", names=column_names, encoding=encoding)
+df = pd.read_csv("../all_data.csv", names=column_names, encoding=encoding)
 
 # Split data into features (X) and labels (y)
 X = df["Text"]
