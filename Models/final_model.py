@@ -1,5 +1,5 @@
 from sklearn.neighbors import KNeighborsClassifier as Knn
-
+from sklearn.linear_model import LogisticRegression
 
 
 def final_model_maker():

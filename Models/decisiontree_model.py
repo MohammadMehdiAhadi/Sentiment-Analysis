@@ -12,7 +12,7 @@ def decision_tree_trainer(x_train, y_train):
     return new_model
 
 
-def decision_tree_prediction(x_train, y_train, x_test):
-    model = decision_tree_trainer(x_train, y_train)
-    pred = model.predict(x_test)
+def decision_tree_prediction(model , x_test):
+    new_model = model
+    pred = new_model.predict(x_test)
     return pred

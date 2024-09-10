@@ -16,7 +16,6 @@ from sklearn.preprocessing import LabelEncoder
 import seaborn as sns
 from sklearn.preprocessing import label_binarize
 
-
 # Detect encoding
 with open("all_data.csv", "rb") as file:
     raw_data = file.read()
@@ -39,18 +38,24 @@ y_encoded = label_encoder.fit_transform(y)
 # Split the data into training and testing sets
 x_train, x_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.1, random_state=0, stratify=y_encoded)
 
-
 # Convert text data into TF-IDF features
 vectorizer = TfidfVectorizer(max_features=5000)
 x_train_tfidf = vectorizer.fit_transform(x_train)
 x_test_tfidf = vectorizer.transform(x_test)
 
-predictions_stacking = np.vstack([logistic_prediction(x_train_tfidf, y_train, x_test_tfidf),
-                                  mlp_prediction(x_train_tfidf, y_train, x_test_tfidf),
-                                  knn_prediction(x_train_tfidf, y_train, x_test_tfidf),
-                                  svm_prediction(x_train_tfidf, y_train, x_test_tfidf),
-                                  decision_tree_prediction(x_train_tfidf, y_train, x_test_tfidf),
-                                  random_forest_prediction(x_train_tfidf, y_train, x_test_tfidf)
+logistic_model = logistic_trainer(x_train_tfidf, y_train)
+mlp_model = mlp_trainer(x_train_tfidf, y_train)
+knn_model = knn_trainer(x_train_tfidf, y_train)
+svm_model = svm_trainer(x_train_tfidf, y_train)
+decition_model = decision_tree_trainer(x_train_tfidf, y_train)
+random_forest_model = random_forest_trainer(x_train_tfidf, y_train)
+
+predictions_stacking = np.vstack([logistic_prediction(logistic_model, x_test_tfidf),
+                                  mlp_prediction(mlp_model, x_test_tfidf),
+                                  knn_prediction(knn_model, x_test_tfidf),
+                                  svm_prediction(svm_model, x_test_tfidf),
+                                  decision_tree_prediction(decition_model, x_test_tfidf),
+                                  random_forest_prediction(random_forest_model, x_test_tfidf)
                                   ]).T
 
 # Meta model prediction
@@ -59,23 +64,23 @@ accuracy = np.mean(predictions_final == y_test)
 print("دقت مدل Stacking:", accuracy * 100)
 print("________________________________________________________________")
 # Classification reports
-print("MLPClassifier :")
-print(classification_report(y_test, mlp_prediction(x_train_tfidf, y_train, x_test_tfidf), zero_division=1))
-print("________________________________________________________________")
 print("Logistic :")
-print(classification_report(y_test, logistic_prediction(x_train_tfidf, y_train, x_test_tfidf), zero_division=1))
+print(classification_report(y_test, logistic_prediction(logistic_model, x_test_tfidf), zero_division=1))
+print("________________________________________________________________")
+print("MLPClassifier :")
+print(classification_report(y_test, mlp_prediction(mlp_model, x_test_tfidf), zero_division=1))
 print("________________________________________________________________")
 print("KNN :")
-print(classification_report(y_test, knn_prediction(x_train_tfidf, y_train, x_test_tfidf), zero_division=1))
+print(classification_report(y_test, knn_prediction(knn_model, x_test_tfidf), zero_division=1))
 print("________________________________________________________________")
 print("SVM :")
-print(classification_report(y_test, svm_prediction(x_train_tfidf, y_train, x_test_tfidf), zero_division=1))
+print(classification_report(y_test, svm_prediction(svm_model, x_test_tfidf), zero_division=1))
 print("________________________________________________________________")
 print("DecisionTree :")
-print(classification_report(y_test, decision_tree_prediction(x_train_tfidf, y_train, x_test_tfidf), zero_division=1))
+print(classification_report(y_test, decision_tree_prediction(decition_model, x_test_tfidf), zero_division=1))
 print("________________________________________________________________")
 print("RandomForest :")
-print(classification_report(y_test, random_forest_prediction(x_train_tfidf, y_train, x_test_tfidf), zero_division=1))
+print(classification_report(y_test, random_forest_prediction(random_forest_model, x_test_tfidf), zero_division=1))
 print("________________________________________________________________")
 print("Final :")
 print(classification_report(y_test, predictions_final))
@@ -104,53 +109,32 @@ plt.ylabel("Number of Predictions")
 plt.savefig("final_predict_bar_chart.jpg")
 plt.show()
 
-# # Binarize the output labels for multi-class
-# y_test_binarized = label_binarize(y_test, classes=[0, 1, 2])  # Assuming you have 3 classes
-# n_classes = y_test_binarized.shape[1]
-#
-# # Calculate ROC curve and ROC AUC for each class
-# fpr = {}
-# tpr = {}
-# roc_auc = {}
-#
-# for i in range(n_classes):
-#     fpr[i], tpr[i], _ = roc_curve(y_test_binarized[:, i], predictions_final[:, i])
-#     roc_auc[i] = auc(fpr[i], tpr[i])
-#
-# # Compute micro-average ROC curve and ROC AUC
-# fpr["micro"], tpr["micro"], _ = roc_curve(y_test_binarized.ravel(), predictions_final.ravel())
-# roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-#
-# # Plot ROC curves for each class
-# plt.figure()
-# for i in range(n_classes):
-#     plt.plot(fpr[i], tpr[i], label='Class {0} ROC curve (AUC = {1:0.2f})'.format(i, roc_auc[i]))
-#
-# plt.plot(fpr["micro"], tpr["micro"], label='Micro-average ROC curve (AUC = {0:0.2f})'.format(roc_auc["micro"]))
-# plt.plot([0, 1], [0, 1], 'k--')  # Diagonal line
-# plt.xlim([0.0, 1.0])
-# plt.ylim([0.0, 1.05])
-# plt.xlabel('False Positive Rate')
-# plt.ylabel('True Positive Rate')
-# plt.title('Receiver Operating Characteristic for Multiclass')
-# plt.legend(loc="lower right")
-# plt.savefig("multiclass_roc_auc.jpg")
-# plt.show()
+models = [decition_model,
+          svm_model,
+          mlp_model,
+          random_forest_model,
+          knn_model,
+          logistic_model
+          ]
+for model in models:
+    # Define the mapping of class indices to sentiment labels
+    class_mapping = {0: "Negative", 1: "Neutral", 2: "Positive"}
+    # Predict the probability distribution
+    text = [
+        "Biohit said that it will reduce the number of leased personnel by 10 , and lay off 10 of its own personnel ."]
+    new_tfidf = vectorizer.transform(text)
 
-# # Define the mapping of class indices to sentiment labels
-# class_mapping = {0: "Negative", 1: "Neutral", 2: "Positive"}
-# # Predict the probability distribution
-# text = [
-#     "Nordea Group's operating profit increased in 2010 by 18 percent year-on-year to 3.64 billion euros and total revenue by 3 percent to 9.33 billion euros."]
-# new_tfidf = vectorizer.transform(text)
-#
-# # Get the predicted probabilities
-# probabilities = model.predict_proba(new_tfidf)
-#
-# # Get the predicted class (the index of the max probability)
-# predicted_class = probabilities.argmax()
-#
-# # Map the predicted class to the corresponding sentiment
-# predicted_sentiment = class_mapping[predicted_class]
-#
-# print(f"The predicted sentiment is: {predicted_sentiment}")
+    # Get the predicted probabilities
+    model = model
+    probabilities = model.predict(new_tfidf)
+
+    # Get the predicted class (the index of the max probability)
+    predicted_class = probabilities.argmax()
+
+    # Map the predicted class to the corresponding sentiment
+    predicted_sentiment = class_mapping[predicted_class]
+
+    print(f"The predicted sentiment of {model} is: {predicted_sentiment}")
+    print()
+    print("________________________________________________________________")
+    print()
