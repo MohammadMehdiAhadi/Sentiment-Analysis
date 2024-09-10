@@ -3,7 +3,8 @@ import pandas as pd
 import chardet
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
+from sklearn.metrics import classification_report, confusion_matrix
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from Models.mlp_model import *
 from Models.knn_model import *
@@ -109,6 +110,10 @@ plt.ylabel("Number of Predictions")
 plt.savefig("final_predict_bar_chart.jpg")
 plt.show()
 
+
+print("For Example :")
+print("Biohit said that it will reduce the number of leased personnel by 10 , and lay off 10 of its own personnel .")
+print()
 models = [decition_model,
           svm_model,
           mlp_model,
@@ -138,3 +143,32 @@ for model in models:
     print()
     print("________________________________________________________________")
     print()
+
+
+while True:
+    new_text = input("Type your text for predict : ")
+    if new_text:
+        for model in models:
+            # Define the mapping of class indices to sentiment labels
+            class_mapping = {0: "Negative", 1: "Neutral", 2: "Positive"}
+            # Predict the probability distribution
+            text = [new_text]
+            new_tfidf = vectorizer.transform(text)
+
+            # Get the predicted probabilities
+            model = model
+            probabilities = model.predict(new_tfidf)
+
+            # Get the predicted class (the index of the max probability)
+            predicted_class = probabilities.argmax()
+
+            # Map the predicted class to the corresponding sentiment
+            predicted_sentiment = class_mapping[predicted_class]
+
+            print(f"The predicted sentiment of {model} is: {predicted_sentiment}")
+            print()
+            print("________________________________________________________________")
+            print()
+
+    else:
+        print(" no text added ")
