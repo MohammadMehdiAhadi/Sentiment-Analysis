@@ -178,8 +178,6 @@ try:
                 print("________________________________________________________________")
                 print(f"The predicted sentiment of {model} is: {predicted_sentiment}")
                 print()
-                print("________________________________________________________________")
-                print()
 
         else:
             print(" no text added ")
